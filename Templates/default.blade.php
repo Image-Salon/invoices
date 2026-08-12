@@ -205,12 +205,5 @@
             @endif
         </main>
 
-        <!-- Page count -->
-        <script type="text/php">
-            if (isset($pdf) && $GLOBALS['with_pagination'] && $PAGE_COUNT > 1) {
-                $pageText = "{PAGE_NUM} of {PAGE_COUNT}";
-                $pdf->page_text(($pdf->get_width()/2) - (strlen($pageText) / 2), $pdf->get_height()-20, $pageText, $fontMetrics->get_font("DejaVu Sans, Arial, Helvetica, sans-serif", "normal"), 7, array(0,0,0));
-            }
-        </script>
     </body>
 </html>
