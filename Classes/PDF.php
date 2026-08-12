@@ -10,7 +10,9 @@
 
 namespace ConsoleTVs\Invoices\Classes;
 
+use Dompdf\Canvas;
 use Dompdf\Dompdf;
+use Dompdf\FontMetrics;
 use Dompdf\Options;
 use Illuminate\Support\Facades\View;
 
@@ -36,26 +38,36 @@ class PDF
         $template = strtolower($template);
 
         $options = new Options();
+        $logoHost = parse_url($invoice->logo, PHP_URL_HOST);
 
-        $options->set('isRemoteEnabled', true);
-        $options->set('isPhpEnabled', true);
+        if (is_string($logoHost) && $logoHost !== '') {
+            $options->set('isRemoteEnabled', true);
+            $options->set('allowedRemoteHosts', [$logoHost]);
+        }
 
         $pdf = new Dompdf($options);
 
-        $context = stream_context_create([
-            'ssl' => [
-                'verify_peer'      => false,
-                'verify_peer_name' => false,
-                'allow_self_signed'=> true,
-            ],
-        ]);
-
-        $pdf->setHttpContext($context);
-
-        $GLOBALS['with_pagination'] = $invoice->with_pagination;
-
         $pdf->loadHtml(View::make('invoices::'.$template, ['invoice' => $invoice]));
         $pdf->render();
+
+        if ($invoice->with_pagination) {
+            $pdf->getCanvas()->page_script(function (
+                int $pageNumber,
+                int $pageCount,
+                Canvas $canvas,
+                FontMetrics $fontMetrics
+            ): void {
+                if ($pageCount <= 1) {
+                    return;
+                }
+
+                $pageText = sprintf('%d of %d', $pageNumber, $pageCount);
+                $font = $fontMetrics->getFont('DejaVu Sans, Arial, Helvetica, sans-serif', 'normal');
+                $x = ($canvas->get_width() - $fontMetrics->getTextWidth($pageText, $font, 7)) / 2;
+
+                $canvas->text($x, $canvas->get_height() - 20, $pageText, $font, 7);
+            });
+        }
 
         return $pdf;
     }
