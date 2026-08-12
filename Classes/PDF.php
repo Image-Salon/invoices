@@ -38,8 +38,12 @@ class PDF
         $template = strtolower($template);
 
         $options = new Options();
+        $logoHost = parse_url($invoice->logo, PHP_URL_HOST);
 
-        $options->set('isRemoteEnabled', true);
+        if (is_string($logoHost) && $logoHost !== '') {
+            $options->set('isRemoteEnabled', true);
+            $options->set('allowedRemoteHosts', [$logoHost]);
+        }
 
         $pdf = new Dompdf($options);
 
