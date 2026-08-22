@@ -319,7 +319,7 @@ class Invoice
      *
      * @return float
      */
-    private function taxPrice(Object $tax_rate = null)
+    private function taxPrice(?Object $tax_rate = null)
     {
         if (is_null($tax_rate)) {
             $tax_total = 0;

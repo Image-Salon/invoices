@@ -189,7 +189,7 @@ trait Setters
      *
      * @return self
      */
-    public function due_date(Carbon $due_date = null)
+    public function due_date(?Carbon $due_date = null)
     {
         $this->due_date = $due_date;
         return $this;
